@@ -8,7 +8,7 @@ namespace user_api.Controllers;
 
 [ApiController]
 [Route("users")]
-public class UsersSeedController : ControllerBase
+public class UserSeedController : ControllerBase
 {
     [HttpPost(Name = "Seed")]
     public async Task<IActionResult> Post([FromServices] IMongoClient mongoClient)

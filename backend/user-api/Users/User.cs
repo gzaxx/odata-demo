@@ -10,5 +10,5 @@ public sealed record User
     public required string Email { get; init; }
     public required DateTime CreatedAt { get; init; }
 
-    public required IReadOnlyCollection<AddressDocument> Addresses { get; init; }
+    public required IReadOnlyCollection<Address> Addresses { get; init; }
 }
