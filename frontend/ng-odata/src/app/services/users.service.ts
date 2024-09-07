@@ -9,6 +9,6 @@ export class UsersService {
   constructor(private http: HttpClient) {}
 
   public getUsers(): Observable<any> {
-    return this.http.get('/api/users/odata/users');
+    return this.http.get('/api/users');
   }
 }
