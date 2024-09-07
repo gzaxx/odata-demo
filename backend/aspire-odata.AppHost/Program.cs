@@ -6,7 +6,7 @@ var mongodb = mongo.AddDatabase("odatadb", "odatadb");
 var userapi = builder.AddProject<Projects.user_api>("user-api")
     .WithReference(mongodb);
 
-builder.AddNpmApp("ng-odata", "../../frontend/ng-odata")
+builder.AddNpmApp("frontend", "../../frontend/ng-odata")
     .WithReference(userapi);
 
 builder.Build().Run();
