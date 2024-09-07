@@ -1,6 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var userapi = builder.AddProject<Projects.user_api>("user-api");
+var mongo = builder.AddMongoDB("mongo", port: 27017);
+var mongodb = mongo.AddDatabase("odatadb");
+
+var userapi = builder.AddProject<Projects.user_api>("user-api")
+    .WithReference(mongodb);
+
 builder.AddNpmApp("ng-odata", "../../frontend/ng-odata")
     .WithReference(userapi);
 
