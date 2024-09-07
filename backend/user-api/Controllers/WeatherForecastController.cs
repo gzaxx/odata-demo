@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace user_api.Controllers;
 
@@ -28,5 +29,23 @@ public class WeatherForecastController : ControllerBase
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         })
         .ToArray();
+    }
+
+    [HttpPost(Name = "Seed")]
+    public async Task<IActionResult> Post([FromServices] IMongoClient mongoClient)
+    {
+        var data = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+        })
+        .ToArray();
+
+        var database = mongoClient.GetDatabase("odatadb");
+        var collection = database.GetCollection<WeatherForecast>("weather");
+
+        await collection.InsertManyAsync(data);
+        return Ok();
     }
 }
