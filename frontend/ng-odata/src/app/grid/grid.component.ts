@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
+import { UsersService } from '../services/users.service';
 
 @Component({
   selector: 'app-grid',
@@ -24,4 +25,8 @@ export class GridComponent {
     { field: 'price' },
     { field: 'electric' },
   ];
+
+  constructor(private usersService: UsersService) {
+    usersService.getUsers().subscribe((d) => console.log(d));
+  }
 }
