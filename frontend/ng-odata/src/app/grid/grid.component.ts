@@ -123,12 +123,13 @@ export class GridComponent implements OnInit {
         params = params.append('$top', options.pageSize);
       }
     }
-
+    this.grid?.setGridOption('loading', true);
     this.usersService
       .getUsers<User>(params)
       .subscribe((data: Response<User>) => {
         this.rowData.set(data.value);
         this.totalPages.set(data['@odata.count']);
+        this.grid?.setGridOption('loading', false);
       });
 
     this.options = options;
