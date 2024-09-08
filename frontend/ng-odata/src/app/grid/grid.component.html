@@ -7,5 +7,8 @@
     [pagination]="true"
     [paginationPageSize]="5"
     [paginationPageSizeSelector]="[5, 10, 50]"
+    [serverSideEnableClientSideSort]="false"
+    (sortChanged)="onSortChanged($event)"
+    (paginationChanged)="onPaginationChanged($event)"
   />
 </div>

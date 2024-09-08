@@ -11,7 +11,8 @@ public class UsersController : ODataController
 {
     private const AllowedQueryOptions ODataAllowed = 
         AllowedQueryOptions.Filter | AllowedQueryOptions.OrderBy | AllowedQueryOptions.Count 
-        | AllowedQueryOptions.Search | AllowedQueryOptions.Expand;
+        | AllowedQueryOptions.Search | AllowedQueryOptions.Expand | AllowedQueryOptions.Top
+        | AllowedQueryOptions.Skip;
 
     [HttpGet]
     [MongoEnableQuery(
