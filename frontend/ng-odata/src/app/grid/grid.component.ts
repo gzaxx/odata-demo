@@ -5,8 +5,8 @@ import {
   GridApi,
   GridReadyEvent,
   SortChangedEvent,
-  PaginationChangedEvent,
 } from 'ag-grid-community';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { UsersService } from '../services/users.service';
 import { User } from '../models/user';
 import { Response } from '../models/response';
@@ -15,12 +15,13 @@ import { HttpParams } from '@angular/common/http';
 @Component({
   selector: 'app-grid',
   standalone: true,
-  imports: [AgGridAngular],
+  imports: [AgGridAngular, MatPaginatorModule],
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.scss',
 })
 export class GridComponent implements OnInit {
   rowData = signal<User[]>([]);
+  totalPages = signal<number>(0);
 
   colDefs: ColDef[] = [
     { field: 'Id', headerName: 'Id' },
@@ -70,15 +71,11 @@ export class GridComponent implements OnInit {
     });
   }
 
-  public onPaginationChanged(pagination: PaginationChangedEvent): void {
-    if (pagination.newPage || pagination.newPageSize) {
-      const page = pagination.api.paginationGetCurrentPage();
-      const pageSize = pagination.api.paginationGetPageSize();
-      this.loadData({
-        page: page + 1,
-        pageSize: pageSize,
-      });
-    }
+  public onPaginationChanged(pagination: PageEvent): void {
+    this.loadData({
+      page: pagination.pageIndex + 1,
+      pageSize: pagination.pageSize,
+    });
   }
 
   public ngOnInit(): void {
@@ -131,6 +128,7 @@ export class GridComponent implements OnInit {
       .getUsers<User>(params)
       .subscribe((data: Response<User>) => {
         this.rowData.set(data.value);
+        this.totalPages.set(data['@odata.count']);
       });
 
     this.options = options;

@@ -1,14 +1,19 @@
 <div class="container">
   <ag-grid-angular
-    class="ag-theme-quartz"
+    class="ag-theme-quartz grid"
     [rowData]="rowData()"
     (gridReady)="onGridReady($event)"
     [columnDefs]="colDefs"
-    [pagination]="true"
-    [paginationPageSize]="5"
-    [paginationPageSizeSelector]="[5, 10, 50]"
+    [pagination]="false"
     [serverSideEnableClientSideSort]="false"
     (sortChanged)="onSortChanged($event)"
-    (paginationChanged)="onPaginationChanged($event)"
   />
+  <mat-paginator
+    [length]="totalPages()"
+    [pageSize]="10"
+    [pageSizeOptions]="[5, 10, 50]"
+    (page)="onPaginationChanged($event)"
+    aria-label="Select page"
+  >
+  </mat-paginator>
 </div>
