@@ -16,4 +16,8 @@ export class UsersService {
       params: params,
     });
   }
+
+  public seed(): Observable<void> {
+    return this.http.post<void>('/api/users', {});
+  }
 }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.OData.ModelBuilder;
 using System.Text.Json;
+using user_api;
 using user_api.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +26,7 @@ builder.Services
 
             options
             .EnableQueryFeatures(50)
-            .AddRouteComponents("odata", modelBuilder.GetEdmModel());
+            .AddRouteComponents("odata", modelBuilder.GetEdmModel(), services => services.AddSingleton<ISearchBinder, UserSerachBinder>());
         }
     );
 

@@ -6,22 +6,27 @@ import {
   GridReadyEvent,
   SortChangedEvent,
 } from 'ag-grid-community';
+import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
 import { UsersService } from '../services/users.service';
 import { User } from '../models/user';
 import { Response } from '../models/response';
 import { HttpParams } from '@angular/common/http';
+import { BehaviorSubject, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-grid',
   standalone: true,
-  imports: [AgGridAngular, MatPaginatorModule],
+  imports: [AgGridAngular, MatPaginatorModule, MatButtonModule, MatInputModule],
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.scss',
 })
 export class GridComponent implements OnInit {
   rowData = signal<User[]>([]);
   totalPages = signal<number>(0);
+
+  private search$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   colDefs: ColDef[] = [
     { field: 'Id', headerName: 'Id' },
@@ -47,9 +52,17 @@ export class GridComponent implements OnInit {
 
   constructor(private usersService: UsersService) {}
 
+  public seed(): void {
+    this.usersService.seed().subscribe((_) => this.loadData());
+  }
+
   public onGridReady(grid: GridReadyEvent): void {
     this.grid = grid.api;
     grid.api.sizeColumnsToFit();
+  }
+
+  onSearch(value: any): void {
+    this.search$.next(value.target.value);
   }
 
   public onSortChanged(sort: SortChangedEvent): void {
@@ -79,6 +92,12 @@ export class GridComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    this.search$.pipe(debounceTime(300)).subscribe((x) => {
+      this.loadData({
+        search: x,
+      });
+    });
+
     this.loadData();
   }
 
@@ -89,7 +108,7 @@ export class GridComponent implements OnInit {
     pageSize: number;
   } = {
     page: 1,
-    pageSize: 5,
+    pageSize: 10,
   };
 
   private loadData(o?: {
@@ -97,6 +116,7 @@ export class GridComponent implements OnInit {
     sortDirection?: string;
     page?: number;
     pageSize?: number;
+    search?: string;
   }): void {
     const options = {
       ...this.options,
@@ -121,6 +141,10 @@ export class GridComponent implements OnInit {
         }
 
         params = params.append('$top', options.pageSize);
+      }
+
+      if (options.search) {
+        params = params.append('$search', options.search);
       }
     }
     this.grid?.setGridOption('loading', true);
