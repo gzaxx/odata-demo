@@ -15,6 +15,7 @@
     [pagination]="false"
     [serverSideEnableClientSideSort]="false"
     (sortChanged)="onSortChanged($event)"
+    (filterChanged)="onFilterChanged($event)"
   />
   <mat-paginator
     [length]="totalPages()"

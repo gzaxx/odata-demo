@@ -4,7 +4,9 @@ import {
   ColDef,
   GridApi,
   GridReadyEvent,
+  FilterChangedEvent,
   SortChangedEvent,
+  ITextFilterParams,
 } from 'ag-grid-community';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -34,13 +36,44 @@ export class GridComponent implements OnInit {
       field: 'FirstName',
       headerName: 'First name',
       comparator: this.emptyComparere,
+      filter: true,
+      filterParams: {
+        maxNumConditions: 1,
+        buttons: ['clear'],
+        filterOptions: ['equals', 'contains'],
+        textMatcher: (_) => {
+          return true;
+        },
+      } as ITextFilterParams,
     },
     {
       field: 'LastName',
       headerName: 'Last name',
       comparator: this.emptyComparere,
+      filter: true,
+      filterParams: {
+        maxNumConditions: 1,
+        buttons: ['clear'],
+        filterOptions: ['equals', 'contains'],
+        textMatcher: (_) => {
+          return true;
+        },
+      } as ITextFilterParams,
     },
-    { field: 'Email', headerName: 'Email', comparator: this.emptyComparere },
+    {
+      field: 'Email',
+      headerName: 'Email',
+      comparator: this.emptyComparere,
+      filter: true,
+      filterParams: {
+        maxNumConditions: 1,
+        buttons: ['clear'],
+        filterOptions: ['equals', 'contains'],
+        textMatcher: (_) => {
+          return true;
+        },
+      } as ITextFilterParams,
+    },
     {
       field: 'CreatedAt',
       headerName: 'Created At',
@@ -65,8 +98,31 @@ export class GridComponent implements OnInit {
     this.search$.next(value.target.value);
   }
 
-  public onSortChanged(sort: SortChangedEvent): void {
-    const columns = sort.columns?.filter((x) => x.getSort());
+  public onFilterChanged($event: FilterChangedEvent): void {
+    console.log(`Filter Changed`);
+    const filter = $event.api.getFilterModel();
+    if (Object.keys(filter).length > 0) {
+      Object.entries(filter).map(([key, value]) => {
+        const filter = <Filter>{
+          column: key,
+          operation: value.type,
+          value: value.filter,
+        };
+
+        this.loadData({
+          filter: filter,
+        });
+      });
+
+      return;
+    }
+    this.loadData({
+      filter: undefined,
+    });
+  }
+
+  public onSortChanged($event: SortChangedEvent): void {
+    const columns = $event.columns?.filter((x) => x.getSort());
 
     if (columns?.length && columns.length > 0) {
       const first = columns[0];
@@ -101,12 +157,7 @@ export class GridComponent implements OnInit {
     this.loadData();
   }
 
-  private options: {
-    sortBy?: string;
-    sortDirection?: string;
-    page: number;
-    pageSize: number;
-  } = {
+  private options: ApiOptions = {
     page: 1,
     pageSize: 10,
   };
@@ -117,6 +168,7 @@ export class GridComponent implements OnInit {
     page?: number;
     pageSize?: number;
     search?: string;
+    filter?: Filter;
   }): void {
     const options = {
       ...this.options,
@@ -146,6 +198,25 @@ export class GridComponent implements OnInit {
       if (options.search) {
         params = params.append('$search', options.search);
       }
+
+      if (options.filter) {
+        const filter = options.filter;
+
+        switch (filter.operation) {
+          case 'equals':
+            params = params.append(
+              '$filter',
+              `${filter.column} eq '${filter.value}'`
+            );
+            break;
+          case 'contains':
+            params = params.append(
+              '$filter',
+              `contains(toLower(${filter.column}), toLower('${filter.value}'))`
+            );
+            break;
+        }
+      }
     }
     this.grid?.setGridOption('loading', true);
     this.usersService
@@ -163,3 +234,17 @@ export class GridComponent implements OnInit {
     return 0;
   }
 }
+
+type ApiOptions = {
+  sortBy?: string;
+  sortDirection?: string;
+  page: number;
+  pageSize: number;
+  filter?: Filter;
+};
+
+type Filter = {
+  column: string;
+  operation: string;
+  value: string;
+};
