@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Response } from '../models/response';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +9,11 @@ import { Observable } from 'rxjs';
 export class UsersService {
   constructor(private http: HttpClient) {}
 
-  public getUsers(): Observable<any> {
-    return this.http.get('/api/users');
+  public getUsers<T>(): Observable<Response<T>> {
+    const params = new HttpParams().append('$count', 'true');
+
+    return this.http.get<Response<T>>('/api/odata/Users', {
+      params: params,
+    });
   }
 }

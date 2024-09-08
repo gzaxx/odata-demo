@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using MongoDB.AspNetCore.OData;
 using MongoDB.Driver;
@@ -6,17 +7,22 @@ using user_api.Users;
 
 namespace user_api.Controllers;
 
-[Route("users")]
-public sealed class UserController : ODataController
+public class UsersController : ODataController
 {
+    private const AllowedQueryOptions ODataAllowed = 
+        AllowedQueryOptions.Filter | AllowedQueryOptions.OrderBy | AllowedQueryOptions.Count 
+        | AllowedQueryOptions.Search | AllowedQueryOptions.Expand;
+
     [HttpGet]
-    [MongoEnableQuery]
-    public IQueryable<User> Get([FromServices] IMongoClient mongoClient)
+    [MongoEnableQuery(
+        PageSize = 50,
+        AllowedQueryOptions = ODataAllowed)]
+    public ActionResult<IQueryable<User>> Get([FromServices] IMongoClient mongoClient)
     {
         var database = mongoClient.GetDatabase("odatadb");
         var collection = database.GetCollection<UserDocument>("users");
 
-        return collection
+        return Ok(collection
             .AsQueryable()
             .Select(x => new User
             {
@@ -32,6 +38,6 @@ public sealed class UserController : ODataController
                     City = a.City,
                     ZipCode = a.ZipCode,
                 }).ToArray(),
-            });
+            }));
     }
 }

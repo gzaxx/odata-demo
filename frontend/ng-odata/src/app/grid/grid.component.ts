@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridReadyEvent } from 'ag-grid-community';
 import { UsersService } from '../services/users.service';
+import { User } from '../models/user';
+import { Response } from '../models/response';
 
 @Component({
   selector: 'app-grid',
@@ -10,23 +12,30 @@ import { UsersService } from '../services/users.service';
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.scss',
 })
-export class GridComponent {
-  // Row Data: The data to be displayed.
-  rowData = [
-    { make: 'Tesla', model: 'Model Y', price: 64950, electric: true },
-    { make: 'Ford', model: 'F-Series', price: 33850, electric: false },
-    { make: 'Toyota', model: 'Corolla', price: 29600, electric: false },
-  ];
+export class GridComponent implements OnInit {
+  rowData = signal<User[]>([]);
 
-  // Column Definitions: Defines the columns to be displayed.
   colDefs: ColDef[] = [
-    { field: 'make' },
-    { field: 'model' },
-    { field: 'price' },
-    { field: 'electric' },
+    { field: 'Id', headerName: 'Id' },
+    { field: 'FirstName', headerName: 'First name' },
+    { field: 'LastName', headerName: 'Last name' },
+    { field: 'Email', headerName: 'Email' },
+    { field: 'CreatedAt', headerName: 'Created At' },
   ];
 
-  constructor(private usersService: UsersService) {
-    usersService.getUsers().subscribe((d) => console.log(d));
+  constructor(private usersService: UsersService) {}
+
+  public onGridReady(grid: GridReadyEvent): void {
+    grid.api.sizeColumnsToFit();
+  }
+
+  public ngOnInit(): void {
+    this.loadData();
+  }
+
+  private loadData(): void {
+    this.usersService.getUsers<User>().subscribe((data: Response<User>) => {
+      this.rowData.set(data.value);
+    });
   }
 }

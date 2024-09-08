@@ -1,7 +1,11 @@
 <div class="container">
   <ag-grid-angular
     class="ag-theme-quartz"
-    [rowData]="rowData"
+    [rowData]="rowData()"
+    (gridReady)="onGridReady($event)"
     [columnDefs]="colDefs"
+    [pagination]="true"
+    [paginationPageSize]="5"
+    [paginationPageSizeSelector]="[5, 10, 50]"
   />
 </div>
